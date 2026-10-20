@@ -1,7 +1,7 @@
-﻿<h1 align="center">🎬 QQPoisk Movie Redirect</h1>
+<h1 align="center">🎬 Kinokino Movie Redirect</h1>
 
 <p align="center">
-  Открывайте ту же страницу фильма или сериала на <strong>qqpoisk.ru</strong> прямо из Kinopoisk.
+  Открывайте ту же страницу фильма или сериала на <strong>kinokino.win</strong> прямо из Kinopoisk.
 </p>
 
 <p align="center">
@@ -11,7 +11,8 @@
 ## ✨ Что делает расширение
 
 - Добавляет кнопку **👁 Смотреть** на страницах фильмов и сериалов Kinopoisk.
-- Сохраняет тот же путь URL и открывает соответствующую страницу на `qqpoisk.ru`.
+- Сохраняет тот же путь URL и открывает соответствующую страницу на `kinokino.win`
+  (по сути заменяет хост `kinopoisk.ru` на `kinokino.win`).
 - Работает на страницах:
   - `https://www.kinopoisk.ru/film/*`
   - `https://www.kinopoisk.ru/series/*`
