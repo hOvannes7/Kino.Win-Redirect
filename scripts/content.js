@@ -1,8 +1,9 @@
-﻿(function () {
-  const BTN_ID = "qqpoisk-watch-button";
-  const WATCH_LABEL = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
-  const WATCH_ICON = "\uD83D\uDC41";
-  const WILL_WATCH_LABEL = "\u0431\u0443\u0434\u0443 \u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
+(function () {
+  const BTN_ID = "kinokino-watch-button";
+  const TARGET_HOST = "kinokino.win";
+  const WATCH_LABEL = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c"; // Смотреть
+  const WATCH_ICON = "\uD83D\uDC41"; // 👁
+  const WILL_WATCH_LABEL = "\u0431\u0443\u0434\u0443 \u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c"; // буду смотреть
   const WATCH_MOVIE_LABEL = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0444\u0438\u043b\u044c\u043c";
   const WATCH_MOVIE_LABEL_SHORT = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0444\u0438\u043b\u044c\u043c";
 
@@ -10,9 +11,10 @@
     return /^\/(film|series)\/\d+\/?/.test(window.location.pathname);
   }
 
+  // Новый метод: меняем только хост, путь сохраняем.
   function buildTargetUrl() {
     const path = window.location.pathname;
-    return `https://www.qqpoisk.ru${path}`;
+    return `https://${TARGET_HOST}${path}`;
   }
 
   function cleanHandlers(el) {
@@ -28,8 +30,8 @@
     const targetUrl = buildTargetUrl();
     const clone = referenceEl.cloneNode(true);
     clone.id = BTN_ID;
-    clone.dataset.qqpoisk = "true";
-    clone.dataset.qqpoiskUrl = targetUrl;
+    clone.dataset.kinokino = "true";
+    clone.dataset.kinokinoUrl = targetUrl;
 
     if (clone.tagName === "A") {
       clone.href = targetUrl;
@@ -43,7 +45,7 @@
         (event) => {
           event.preventDefault();
           event.stopPropagation();
-          window.location.assign(clone.dataset.qqpoiskUrl || buildTargetUrl());
+          window.location.assign(clone.dataset.kinokinoUrl || buildTargetUrl());
         },
         true
       );
@@ -154,7 +156,7 @@
       if (existing && existing.tagName === "A") {
         existing.href = targetUrl;
       } else if (existing) {
-        existing.dataset.qqpoiskUrl = targetUrl;
+        existing.dataset.kinokinoUrl = targetUrl;
       }
       return;
     }
