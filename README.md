@@ -1,7 +1,7 @@
-﻿<h1 align="center">🎬 QQPoisk Movie Redirect</h1>
+<h1 align="center">🎬 Kinokino Movie Redirect</h1>
 
 <p align="center">
-  Open the same movie/series page on <strong>qqpoisk.ru</strong> directly from Kinopoisk.
+  Open the same movie/series page on <strong>kinokino.win</strong> directly from Kinopoisk.
 </p>
 
 <p align="center">
@@ -11,7 +11,8 @@
 ## ✨ What It Does
 
 - Adds a quick **👁 Watch** button on Kinopoisk movie/series pages.
-- Keeps the same URL path and opens the matching page on `qqpoisk.ru`.
+- Keeps the same URL path and opens the matching page on `kinokino.win`
+  (i.e. replaces the `kinopoisk.ru` host with `kinokino.win`).
 - Works on:
   - `https://www.kinopoisk.ru/film/*`
   - `https://www.kinopoisk.ru/series/*`
