@@ -1,8 +1,8 @@
-﻿{
+{
   "manifest_version": 3,
-  "name": "QQPoisk Movie Redirect",
-  "version": "1.1.0",
-  "description": "Adds a redirect button from movie/series pages to qqpoisk.ru.",
+  "name": "Kino.Win Redirect",
+  "version": "2.0.0",
+  "description": "Adds a redirect button from movie/series pages to kinokino.win.",
   "icons": {
     "16": "assets/icons/icon16.png",
     "32": "assets/icons/icon32.png",
@@ -10,7 +10,7 @@
     "128": "assets/icons/icon128.png"
   },
   "action": {
-    "default_title": "Open on QQPoisk",
+    "default_title": "Open on Kinokino",
     "default_icon": {
       "16": "assets/icons/icon16.png",
       "32": "assets/icons/icon32.png"
