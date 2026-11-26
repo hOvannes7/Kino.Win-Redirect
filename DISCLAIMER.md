@@ -1,4 +1,4 @@
-﻿# Disclaimer / Дисклеймер
+# Disclaimer / Дисклеймер
 
 ## EN
 

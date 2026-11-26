@@ -1,38 +1,52 @@
-﻿(function () {
-  const BTN_ID = "qqpoisk-watch-button";
-  const WATCH_LABEL = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
-  const WATCH_ICON = "\uD83D\uDC41";
-  const WILL_WATCH_LABEL = "\u0431\u0443\u0434\u0443 \u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
-  const WATCH_MOVIE_LABEL = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0444\u0438\u043b\u044c\u043c";
-  const WATCH_MOVIE_LABEL_SHORT = "\u0421\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0444\u0438\u043b\u044c\u043c";
+(function () {
+  const KR = window.KinoRedirect; // из shared.js
+  const BTN_ID = "kinokino-watch-button";
+  const FLOAT_ID = "kinokino-floating-button";
+  const WATCH_LABEL = "Смотреть";
+  const FALLBACK_DELAY = 3000; // сколько ждём родные кнопки Кинопоиска, прежде чем показать плавающую кнопку
+
+  const state = {
+    domain: KR.DEFAULT_DOMAIN,
+    ready: false,
+    path: location.pathname,
+    routeStart: Date.now(),
+    nextScan: 0,
+    timer: null
+  };
 
   function isMoviePage() {
-    return /^\/(film|series)\/\d+\/?/.test(window.location.pathname);
+    return Boolean(KR.parseMoviePath(location.pathname));
   }
 
+  // Ссылка всегда ведёт на /film/ID/ или /series/ID/ — даже со страниц /cast/, /reviews/ и т.п.
   function buildTargetUrl() {
-    const path = window.location.pathname;
-    return `https://www.qqpoisk.ru${path}`;
+    const movie = KR.parseMoviePath(location.pathname);
+    return movie ? KR.buildUrl(state.domain, movie) : null;
+  }
+
+  function openUrl(url, newTab) {
+    if (newTab) window.open(url, "_blank", "noopener");
+    else window.location.assign(url);
+  }
+
+  function applyUrl(el, url) {
+    el.dataset.kinokinoUrl = url;
+    if (el.tagName === "A") el.href = url;
   }
 
   function cleanHandlers(el) {
     Array.from(el.attributes).forEach((attr) => {
-      if (attr.name.toLowerCase().startsWith("on")) {
-        el.removeAttribute(attr.name);
-      }
+      if (attr.name.toLowerCase().startsWith("on")) el.removeAttribute(attr.name);
     });
   }
 
-  function createButton(referenceEl, useIcon = false) {
-    if (!referenceEl) return null;
-    const targetUrl = buildTargetUrl();
+  function createButton(referenceEl, url) {
     const clone = referenceEl.cloneNode(true);
     clone.id = BTN_ID;
-    clone.dataset.qqpoisk = "true";
-    clone.dataset.qqpoiskUrl = targetUrl;
+    clone.dataset.kinokino = "true";
+    applyUrl(clone, url);
 
     if (clone.tagName === "A") {
-      clone.href = targetUrl;
       clone.target = "_self";
       clone.rel = "noopener noreferrer";
     } else {
@@ -43,72 +57,66 @@
         (event) => {
           event.preventDefault();
           event.stopPropagation();
-          window.location.assign(clone.dataset.qqpoiskUrl || buildTargetUrl());
+          // Ctrl / Cmd / Shift + клик — в новой вкладке
+          openUrl(clone.dataset.kinokinoUrl, event.ctrlKey || event.metaKey || event.shiftKey);
+        },
+        true
+      );
+      // клик средней кнопкой мыши — тоже в новой вкладке
+      clone.addEventListener(
+        "auxclick",
+        (event) => {
+          if (event.button !== 1) return;
+          event.preventDefault();
+          event.stopPropagation();
+          openUrl(clone.dataset.kinokinoUrl, true);
         },
         true
       );
     }
 
     cleanHandlers(clone);
-    clone.textContent = useIcon ? WATCH_ICON : WATCH_LABEL;
+    clone.textContent = WATCH_LABEL;
     clone.setAttribute("aria-label", WATCH_LABEL);
     clone.setAttribute("title", WATCH_LABEL);
     return clone;
   }
 
-  function findWillWatchButton() {
-    const candidates = Array.from(document.querySelectorAll("button, a"));
-    return candidates.find((el) => {
-      const txt = (el.textContent || "").trim().toLowerCase();
-      return txt.includes(WILL_WATCH_LABEL);
-    });
+  // ── Поиск родной кнопки, рядом с которой вставляем свою ──
+
+  const ANCHOR_MATCHERS = [
+    (t) => t.includes("буду смотреть"),
+    (t) => t === "смотреть фильм",
+    (t) => t.includes("смотреть сериал"),
+    (t) => t === "смотреть",
+    (t) => t.includes("купить и смотреть")
+  ];
+
+  function textOf(el) {
+    return (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
   }
 
-  function findWatchMovieButton() {
-    const candidates = Array.from(document.querySelectorAll("button, a"));
-    return candidates.find((el) => {
-      const txt = (el.textContent || "").trim();
-      return txt === WATCH_MOVIE_LABEL || txt === WATCH_MOVIE_LABEL_SHORT;
-    });
-  }
-
-  function findWatchSeriesButton() {
-    const candidates = Array.from(document.querySelectorAll("button, a"));
-    return candidates.find((el) => {
-      const txt = (el.textContent || "").trim();
-      return txt === "Смотреть сериал" || txt.toLowerCase().includes("смотреть сериал");
-    });
-  }
-
-  function findSimpleWatchButton() {
-    const candidates = Array.from(document.querySelectorAll("button, a"));
-    return candidates.find((el) => {
-      const txt = (el.textContent || "").trim();
-      return txt === WATCH_LABEL;
-    });
-  }
-
-  function findBuyAndWatchButton() {
-    const candidates = Array.from(document.querySelectorAll("button, a"));
-    return candidates.find((el) => {
-      const txt = (el.textContent || "").trim();
-      return txt === "Купить и смотреть" || txt.toLowerCase().includes("купить и смотреть");
-    });
+  function findAnchor() {
+    const items = Array.from(document.querySelectorAll("button, a"))
+      .filter((el) => el.id !== BTN_ID && el.id !== FLOAT_ID)
+      .map((el) => ({ el, text: textOf(el) }));
+    for (const match of ANCHOR_MATCHERS) {
+      const hit = items.find((item) => match(item.text));
+      if (hit) return hit.el;
+    }
+    return null;
   }
 
   function findMoreButtonNear(willWatch) {
-    if (!willWatch) return null;
     const row = findActionRow(willWatch);
     if (!row) return null;
-    const clicks = Array.from(row.querySelectorAll("button, a")).filter(
+    const others = Array.from(row.querySelectorAll("button, a")).filter(
       (el) => el !== willWatch && el.id !== BTN_ID
     );
-    return (
-      clicks.find((el) => {
-        const txt = (el.textContent || "").trim();
-        return txt === "..." || txt === "\u2026";
-      }) || null
-    );
+    return others.find((el) => {
+      const txt = (el.textContent || "").trim();
+      return txt === "..." || txt === "…";
+    }) || null;
   }
 
   function findActionRow(willWatch) {
@@ -117,11 +125,8 @@
       const parent = node.parentElement;
       if (!parent) break;
       const style = window.getComputedStyle(parent);
-      const isRowFlex =
-        style.display.includes("flex") && style.flexDirection !== "column";
-      if (isRowFlex && parent.querySelectorAll("button, a").length >= 2) {
-        return parent;
-      }
+      const isRowFlex = style.display.includes("flex") && style.flexDirection !== "column";
+      if (isRowFlex && parent.querySelectorAll("button, a").length >= 2) return parent;
       node = parent;
     }
     return willWatch.parentElement;
@@ -141,52 +146,17 @@
     const wrap = rowChild.cloneNode(false);
     wrap.removeAttribute("id");
     wrap.removeAttribute("data-testid");
+    wrap.dataset.kinokinoWrap = "true"; // чтобы убрать обёртку вместе с кнопкой
     wrap.innerHTML = "";
     wrap.appendChild(btn);
     return wrap;
   }
 
-  function mountButton() {
-    if (!isMoviePage()) return;
-    if (document.getElementById(BTN_ID)) {
-      const existing = document.getElementById(BTN_ID);
-      const targetUrl = buildTargetUrl();
-      if (existing && existing.tagName === "A") {
-        existing.href = targetUrl;
-      } else if (existing) {
-        existing.dataset.qqpoiskUrl = targetUrl;
-      }
-      return;
-    }
-
-    let willWatch = findWillWatchButton();
-
-    if (!willWatch) {
-      willWatch = findWatchMovieButton();
-    }
-
-    if (!willWatch) {
-      willWatch = findWatchSeriesButton();
-    }
-
-    if (!willWatch) {
-      willWatch = findSimpleWatchButton();
-    }
-
-    if (!willWatch) {
-      willWatch = findBuyAndWatchButton();
-    }
-
-    if (!willWatch || !willWatch.parentElement) return;
+  function mountInline(willWatch, url) {
+    if (!willWatch.parentElement) return false;
     const row = findActionRow(willWatch);
     const moreButton = findMoreButtonNear(willWatch);
-    const template = moreButton || willWatch;
-
-    const btn = createButton(template);
-    if (!btn) return;
-    btn.textContent = WATCH_LABEL;
-    btn.setAttribute("aria-label", WATCH_LABEL);
-    btn.setAttribute("title", WATCH_LABEL);
+    const btn = createButton(moreButton || willWatch, url);
 
     if (row) {
       const moreChild = rowChildContaining(row, moreButton);
@@ -204,13 +174,110 @@
     } else {
       willWatch.insertAdjacentElement("afterend", btn);
     }
+    return true;
   }
 
-  const observer = new MutationObserver(() => mountButton());
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true
+  // ── Запасная плавающая кнопка: если родных кнопок на странице нет ──
+
+  function showFloating(url) {
+    let a = document.getElementById(FLOAT_ID);
+    if (!a) {
+      a = document.createElement("a");
+      a.id = FLOAT_ID;
+      a.textContent = "▶ " + WATCH_LABEL;
+      a.target = "_self";
+      a.rel = "noopener noreferrer";
+      a.style.cssText =
+        "position:fixed;right:24px;bottom:24px;z-index:2147483647;padding:12px 20px;" +
+        "border-radius:999px;background:#f60;color:#fff;font:600 15px/1 system-ui,sans-serif;" +
+        "text-decoration:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35)";
+      document.body.appendChild(a);
+    }
+    applyUrl(a, url);
+  }
+
+  function removeFloating() {
+    const a = document.getElementById(FLOAT_ID);
+    if (a) a.remove();
+  }
+
+  function removeInline() {
+    const btn = document.getElementById(BTN_ID);
+    if (btn) (btn.closest("[data-kinokino-wrap]") || btn).remove();
+  }
+
+  // ── Основной цикл ──
+
+  function run() {
+    if (!state.ready) return;
+
+    // Перешли на другую страницу без перезагрузки — начинаем с чистого листа
+    if (location.pathname !== state.path) {
+      state.path = location.pathname;
+      state.routeStart = Date.now();
+      state.nextScan = 0;
+      removeInline();
+      removeFloating();
+    }
+
+    if (!isMoviePage()) {
+      removeInline();
+      removeFloating();
+      return;
+    }
+
+    const url = buildTargetUrl();
+    const existing = document.getElementById(BTN_ID);
+    if (existing && existing.isConnected) {
+      applyUrl(existing, url);
+      removeFloating();
+      return;
+    }
+
+    const floating = document.getElementById(FLOAT_ID);
+    if (floating && Date.now() < state.nextScan) {
+      applyUrl(floating, url);
+      return;
+    }
+
+    const anchor = findAnchor();
+    if (anchor && mountInline(anchor, url)) {
+      removeFloating();
+      return;
+    }
+
+    if (Date.now() - state.routeStart > FALLBACK_DELAY) {
+      showFloating(url);
+      state.nextScan = Date.now() + 2000; // пока плавающая кнопка висит, ищем родные реже
+    }
+  }
+
+  function schedule() {
+    if (state.timer) return;
+    state.timer = setTimeout(() => {
+      state.timer = null;
+      run();
+    }, 150);
+  }
+
+  KR.getDomain().then((domain) => {
+    state.domain = domain;
+    state.ready = true;
+    schedule();
   });
 
-  mountButton();
+  try {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== "sync" || !changes.domain) return;
+      state.domain = KR.normalizeDomain(changes.domain.newValue) || KR.DEFAULT_DOMAIN;
+      schedule();
+    });
+  } catch (_) {
+    /* расширение было обновлено — страница перезагрузится сама */
+  }
+
+  new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("popstate", schedule);
+  if (window.navigation) window.navigation.addEventListener("currententrychange", schedule);
+  setInterval(schedule, 1000); // чтобы сработала плавающая кнопка, даже если страница больше не меняется
 })();

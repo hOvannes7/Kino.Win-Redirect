@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Kino.Win Redirect — настройки</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 14px/1.5 system-ui, sans-serif; margin: 0; padding: 20px; min-width: 340px; }
+    h1 { font-size: 16px; margin: 0 0 16px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input { box-sizing: border-box; width: 100%; padding: 8px 10px; font: inherit; border: 1px solid #888; border-radius: 6px; }
+    #preview { margin: 8px 0 16px; color: #888; word-break: break-all; }
+    button { font: inherit; padding: 7px 16px; border-radius: 6px; border: 1px solid #888; cursor: pointer; }
+    #save { background: #f60; border-color: #f60; color: #fff; }
+    #status { min-height: 1.5em; margin-top: 12px; }
+    .ok { color: #2a8a3a; } .err { color: #d33; }
+  </style>
+</head>
+<body>
+  <h1>Kino.Win Redirect</h1>
+  <label for="domain">Домен сайта</label>
+  <input id="domain" placeholder="kinokino.win" spellcheck="false" autocomplete="off">
+  <div id="preview"></div>
+  <button id="save">Сохранить</button>
+  <button id="reset">Сбросить</button>
+  <div id="status" role="status"></div>
+  <script src="../scripts/shared.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

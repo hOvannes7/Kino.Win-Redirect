@@ -1,7 +1,7 @@
-﻿<h1 align="center">🎬 QQPoisk Movie Redirect</h1>
+<h1 align="center">🎬 Kinokino Movie Redirect</h1>
 
 <p align="center">
-  Open the same movie/series page on <strong>qqpoisk.ru</strong> directly from Kinopoisk.
+  Open the same movie/series page on <strong>kinokino.win</strong> directly from Kinopoisk.
 </p>
 
 <p align="center">
@@ -10,11 +10,12 @@
 
 ## ✨ What It Does
 
-- Adds a quick **👁 Watch** button on Kinopoisk movie/series pages.
-- Keeps the same URL path and opens the matching page on `qqpoisk.ru`.
-- Works on:
-  - `https://www.kinopoisk.ru/film/*`
-  - `https://www.kinopoisk.ru/series/*`
+- Adds a **Watch** button on Kinopoisk movie/series pages (also on their sub-pages like cast or reviews).
+  If Kinopoisk has no buttons to attach to, a floating button appears in the corner instead.
+- Opens the matching page `kinokino.win/film/ID/` (or `/series/ID/`). Ctrl/Cmd+click or middle click opens it in a new tab.
+- **Toolbar icon** — click it on a movie page to open that movie on Kinokino.
+- **Context menu** — right-click any movie link (search results, lists) → *Открыть на Kinokino*.
+- **Settings** — right-click the extension icon → *Options* to change the site domain, so you don't need to update the extension when the mirror moves.
 
 ## 🚀 Quick Start
 
@@ -26,7 +27,10 @@
 ## 🧩 Project Structure
 
 - `manifest.json` — extension manifest (MV3)
-- `scripts/content.js` — page integration logic
+- `scripts/content.js` — button on the Kinopoisk page
+- `scripts/background.js` — toolbar icon and context menu
+- `scripts/shared.js` — URL parsing shared by all parts
+- `options/` — settings page (site domain)
 - `assets/icons/` — extension icons (`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`)
 
 ## ⚖️ Legal Notice
